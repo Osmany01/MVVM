@@ -1,34 +1,41 @@
 package com.example.mvvm.ui.popularmovies.adapter
 
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.mvvm.R
-import com.example.mvvm.data.api.IMAGE_BASE_URL
-import com.example.mvvm.data.model.MovieModel
-import com.example.mvvm.ui.moviedetails.MovieDetailsActivity
+import com.example.mvvm.data.domain.MovieModel
+import com.example.mvvm.databinding.ItemMovieBinding
+import com.example.mvvm.ui.utils.collectFlow
+import com.example.mvvm.ui.utils.onClickEvents
+import com.example.mvvm.ui.utils.toast
 import kotlinx.android.synthetic.main.item_movie.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class PopularMoviePagedAdapter(private val context: Context, private val listener: OnFavoriteClickListener) :
-    PagedListAdapter<MovieModel, RecyclerView.ViewHolder>(MovieDiffCallback()) {
+@ExperimentalCoroutinesApi
+class PopularMoviesAdapter(private val scope: CoroutineScope) :
+    ListAdapter<MovieModel, PopularMoviesAdapter.MovieViewHolder>(MovieDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
 
         val view: View =
             LayoutInflater.from(parent.context).inflate(R.layout.item_movie, parent, false)
         return MovieViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MovieViewHolder, position: Int)  = with(holder) {
 
-        (holder as MovieViewHolder).bind(getItem(position), context, listener)
+        val item = getItem(position)
+        bind(item)
+
+        scope.collectFlow(itemView.onClickEvents) {
+            itemView.context.toast(item.title)
+        }
     }
 
     class MovieDiffCallback : DiffUtil.ItemCallback<MovieModel>() {
@@ -46,18 +53,20 @@ class PopularMoviePagedAdapter(private val context: Context, private val listene
 
     class MovieViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        fun bind(movie: MovieModel?, context: Context, listener: OnFavoriteClickListener) {
+        private val binding = ItemMovieBinding.bind(view)
 
-            itemView.movie_title.text = movie?.title
+        fun bind(movie: MovieModel) = with(binding){
+
+            itemView.movie_title.text = movie.title
 
             val movieUrl: String = IMAGE_BASE_URL.plus(movie?.imageUrl)
-            Glide.with(context)
+            Glide.with(ivMainMovieImage.context)
                 .load(movieUrl)
-                .into(itemView.iv_main_movie_image)
+                .into(ivMainMovieImage)
 
-            if (movie != null) {
-                itemView.iv_fav.setImageResource(if (movie.isFavorite) R.drawable.ic_star_selected else R.drawable.ic_star)
-            }
+
+           /* ivFav.setImageResource(if (movie.isFavorite) R.drawable.ic_star_selected else R.drawable.ic_star)
+
             itemView.iv_main_movie_image.setOnClickListener {
 
                 val intent = Intent(context, MovieDetailsActivity::class.java)
@@ -70,7 +79,12 @@ class PopularMoviePagedAdapter(private val context: Context, private val listene
                     movie.isFavorite = !movie.isFavorite
                     (it as ImageView).setImageResource(if (movie.isFavorite) R.drawable.ic_star_selected else R.drawable.ic_star)
                 }
-            }
+            }*/
         }
+    }
+
+    companion object {
+
+        const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w185/"
     }
 }

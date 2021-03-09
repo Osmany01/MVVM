@@ -1,10 +1,8 @@
+/*
 package com.example.mvvm.ui.moviedetails
 
 import androidx.lifecycle.LiveData
-import com.example.mvvm.data.api.MoviesApiQueries
-import com.example.mvvm.data.model.MovieDetailsModel
-import com.example.mvvm.data.repository.MovieDetailsNetwork
-import com.example.mvvm.data.repository.NetworkState
+
 import io.reactivex.disposables.CompositeDisposable
 
 class MovieDetailsRepository(private val apiQueries: MoviesApiQueries) {
@@ -23,4 +21,4 @@ class MovieDetailsRepository(private val apiQueries: MoviesApiQueries) {
 
         return movieDetailsNetwork.networkState
     }
-}
+}*/

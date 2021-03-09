@@ -3,41 +3,36 @@ package com.example.mvvm.ui.popularmovies
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagedList
-import com.example.mvvm.data.model.MovieModel
-import com.example.mvvm.data.repository.NetworkState
+import com.example.mvvm.data.domain.MovieModel
+import com.example.mvvm.data.domain.MoviesRepository
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
-    private val repositoryTopMovies: MoviesPagedRepository
-    // private val repositorySearcher: SearchMoviePagedRepository
+    private val repositoryTopMovies: MoviesRepository
 ) : ViewModel() {
 
-    private val compositeDisposable = CompositeDisposable()
-    private val currentQuery = MutableLiveData("")
+    private val _progressBar = MutableStateFlow(true)
+    val progressBar: StateFlow<Boolean>
+        get() = _progressBar
 
-    val moviePageList: LiveData<PagedList<MovieModel>> by lazy {
+    val movies: Flow<List<MovieModel>>
+        get() = repositoryTopMovies.getMovies()
 
-        repositoryTopMovies.synchronizedMovies(compositeDisposable)
+    init {
+        viewModelScope.launch {
+            notifyLastVisible(0)
+        }
     }
 
-    val networkState: LiveData<NetworkState> by lazy {
-
-        repositoryTopMovies.getNetworkState()
+    suspend fun notifyLastVisible(lastVisible: Int) {
+        repositoryTopMovies.checkRequiredNewPage(lastVisible)
+        _progressBar.value = false
     }
 
-  /*  val searchMoviePageList: LiveData<PagedList<ItemSearchMovieModel>> = currentQuery.switchMap {
-
-        repositorySearcher.synchronizedSearchedMovie(it, compositeDisposable)
-    }*/
-
-    fun searchMovie(query: String) {
-
-        currentQuery.postValue(query)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.dispose()
-    }
 }

@@ -1,3 +1,4 @@
+/*
 package com.example.mvvm.ui.moviedetails
 
 import androidx.lifecycle.LiveData
@@ -25,4 +26,4 @@ class MovieDetailsViewModel(private val repository: MovieDetailsRepository, movi
         super.onCleared()
         compositeDisposable.dispose()
     }
-}
+}*/

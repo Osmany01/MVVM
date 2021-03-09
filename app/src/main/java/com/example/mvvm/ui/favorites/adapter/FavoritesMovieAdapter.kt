@@ -1,3 +1,4 @@
+/*
 package com.example.mvvm.ui.favorites.adapter
 
 import android.content.Context
@@ -9,8 +10,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.mvvm.R
-import com.example.mvvm.data.api.IMAGE_BASE_URL
-import com.example.mvvm.data.model.MovieModel
+import com.example.mvvm.data.domain.MovieModel
 import com.example.mvvm.ui.moviedetails.MovieDetailsActivity
 import kotlinx.android.synthetic.main.item_movie.view.*
 
@@ -40,7 +40,7 @@ class FavoritesMovieAdapter(val context: Context, val favoriteList: MutableList<
 
             itemView.movie_title.text = movie?.title
 
-            val movieUrl: String = IMAGE_BASE_URL.plus(movie?.imageUrl)
+            val movieUrl: String = ""//IMAGE_BASE_URL.plus(movie?.imageUrl)
             Glide.with(context)
                 .load(movieUrl)
                 .into(itemView.iv_main_movie_image)
@@ -56,4 +56,4 @@ class FavoritesMovieAdapter(val context: Context, val favoriteList: MutableList<
             }
         }
     }
-}
+}*/

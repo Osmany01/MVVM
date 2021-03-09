@@ -3,72 +3,60 @@ package com.example.mvvm.ui.popularmovies
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.mvvm.R
-import com.example.mvvm.data.api.MovieQueriesClient
-import com.example.mvvm.data.api.MoviesApiQueries
-import com.example.mvvm.data.model.MovieModel
-import com.example.mvvm.data.repository.NetworkState
-import com.example.mvvm.ui.favorites.FavoritesMoviesActivity
-import com.example.mvvm.ui.popularmovies.adapter.OnFavoriteClickListener
-import com.example.mvvm.ui.popularmovies.adapter.PopularMoviePagedAdapter
+import com.example.mvvm.data.db.RoomDataSource
+import com.example.mvvm.data.domain.MoviesRepository
+import com.example.mvvm.data.server.TheMovieDBDataSource
+import com.example.mvvm.databinding.ActivityMainBinding
+//import com.example.mvvm.ui.favorites.FavoritesMoviesActivity
+import com.example.mvvm.ui.popularmovies.adapter.PopularMoviesAdapter
+import com.example.mvvm.ui.utils.app
+import com.example.mvvm.ui.utils.collectFlow
+import com.example.mvvm.ui.utils.lastVisibleEvents
+import com.example.mvvm.ui.utils.visible
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.ArrayList
 
 
-class MainActivity : AppCompatActivity(), OnFavoriteClickListener {
+@ExperimentalCoroutinesApi
+class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainActivityViewModel
-
-    lateinit var repositoryMovies: MoviesPagedRepository
-    private var favoriteList  = mutableListOf<MovieModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val apiQueries: MoviesApiQueries = MovieQueriesClient.getClient()
-        repositoryMovies = MoviesPagedRepository(apiQueries)
+        ActivityMainBinding.inflate(layoutInflater).apply {
+            setContentView(root)
 
-        viewModel = getViewModel()
+            viewModel = getViewModel()
+            val popularMoviesAdapter = PopularMoviesAdapter(lifecycleScope)
 
-        val moviePagerAdapter = PopularMoviePagedAdapter(this, this)
+            lifecycleScope.collectFlow(viewModel.progressBar) { progressBarMovies.visible}
+            lifecycleScope.collectFlow(viewModel.movies) {popularMoviesAdapter.submitList(it)}
 
-        initMoviesRecyclerView(moviePagerAdapter)
-        viewModel.moviePageList.observe(this, Observer { pagedListMovieModel ->
+            lifecycleScope.collectFlow(rvMovies.lastVisibleEvents) {
+                viewModel.notifyLastVisible(it)
+            }
 
-            moviePagerAdapter.submitList(pagedListMovieModel)
-        })
+            rvMovies.adapter = popularMoviesAdapter
+        }
 
-        viewModel.networkState.observe(this, Observer { networkState ->
-            progress_bar_movies.visibility =
-                if (networkState == NetworkState.LOADING) View.VISIBLE else View.GONE
-
-            tv_error_movies.visibility =
-                if (networkState == NetworkState.ERROR) View.VISIBLE else View.GONE
-        })
-
-        floating_button.setOnClickListener {
+       /* floating_button.setOnClickListener {
             if (!favoriteList.isNullOrEmpty()) {
 
                 val intent = Intent(this, FavoritesMoviesActivity::class.java)
                 intent.putParcelableArrayListExtra("favorites", favoriteList as ArrayList<out Parcelable>)
                 startActivity(intent)
             }
-        }
-    }
-
-    private fun initMoviesRecyclerView(adapter: PopularMoviePagedAdapter) {
-
-        val gridLayoutManager = GridLayoutManager(this, 3)
-        rv_movies.layoutManager = gridLayoutManager
-        rv_movies.setHasFixedSize(true)
-        rv_movies.adapter = adapter
+        }*/
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -77,17 +65,13 @@ class MainActivity : AppCompatActivity(), OnFavoriteClickListener {
         return ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-                return MainActivityViewModel(repositoryMovies) as T
+                return MainActivityViewModel(
+                    MoviesRepository(
+                        RoomDataSource(app.db),
+                        TheMovieDBDataSource(getString(R.string.api_key))
+                    )
+                )as T
             }
         }).get(MainActivityViewModel::class.java)
-    }
-
-    override fun onFavoriteClick(movie: MovieModel?) {
-
-        if (movie != null){
-            if (favoriteList.remove(movie))
-            else favoriteList.add(movie)
-        }
-
     }
 }

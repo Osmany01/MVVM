@@ -1,3 +1,4 @@
+/*
 package com.example.mvvm.ui.moviedetails
 
 import androidx.appcompat.app.AppCompatActivity
@@ -9,11 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.Factory
 import com.bumptech.glide.Glide
 import com.example.mvvm.R
-import com.example.mvvm.data.api.IMAGE_BASE_URL
-import com.example.mvvm.data.api.MovieQueriesClient
-import com.example.mvvm.data.api.MoviesApiQueries
-import com.example.mvvm.data.model.MovieDetailsModel
-import com.example.mvvm.data.repository.NetworkState
+
 import kotlinx.android.synthetic.main.activity_movie_details.*
 
 class MovieDetailsActivity : AppCompatActivity() {
@@ -26,29 +23,35 @@ class MovieDetailsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_movie_details)
 
         val movieId: Int = intent.getIntExtra("id", 1)
+*/
+/*
+       // val apiQueries: MoviesApiQueries = MovieQueriesClient.getClient()
+        repository = MovieDetailsRepository(apiQueries)*//*
 
-        val apiQueries: MoviesApiQueries = MovieQueriesClient.getClient()
-        repository = MovieDetailsRepository(apiQueries)
 
         viewModel = getViewModel(movieId)
         viewModel.movieDetailsModel.observe(this, Observer { movieDetailsModel ->
-            updateUI(movieDetailsModel)
+           // updateUI(movieDetailsModel)
         })
 
-        viewModel.networkState.observe(this, Observer { networkState ->
+    */
+/*    viewModel.networkState.observe(this, Observer { networkState ->
             progress_bar.visibility = if (networkState == NetworkState.LOADING) View.VISIBLE else View.GONE
 
             tv_error.visibility = if (networkState == NetworkState.ERROR) View.VISIBLE else View.GONE
-        })
+        })*//*
+
     }
 
-    private fun updateUI(movieDetailsModel: MovieDetailsModel?) {
+  */
+/*  private fun updateUI(movieDetailsModel: MovieDetailsModel?) {
         tv_movie_title.text = movieDetailsModel?.title
         tv_movie_description.text = movieDetailsModel?.overview
 
         val movieImageUrl: String = IMAGE_BASE_URL.plus(movieDetailsModel?.posterPath)
         Glide.with(this).load(movieImageUrl).into(iv_movie_image)
     }
+*//*
 
     @Suppress("UNCHECKED_CAST")
     private fun getViewModel(movieId: Int) : MovieDetailsViewModel {
@@ -62,3 +65,4 @@ class MovieDetailsActivity : AppCompatActivity() {
         }).get(MovieDetailsViewModel::class.java)
     }
 }
+*/
