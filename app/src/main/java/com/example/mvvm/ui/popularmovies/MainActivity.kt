@@ -3,6 +3,7 @@ package com.example.mvvm.ui.popularmovies
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -19,24 +20,30 @@ import com.example.mvvm.ui.utils.app
 import com.example.mvvm.ui.utils.collectFlow
 import com.example.mvvm.ui.utils.lastVisibleEvents
 import com.example.mvvm.ui.utils.visible
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.ArrayList
+import javax.inject.Inject
 
 
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: MainActivityViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val viewModel: MainActivityViewModel by viewModels  { viewModelFactory}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        AndroidInjection.inject(this)
 
         ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
 
-            viewModel = getViewModel()
+           // viewModel = getViewModel()
             val popularMoviesAdapter = PopularMoviesAdapter(lifecycleScope)
 
             lifecycleScope.collectFlow(viewModel.progressBar) { progressBarMovies.visible}
@@ -59,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         }*/
     }
 
-    @Suppress("UNCHECKED_CAST")
+   /* @Suppress("UNCHECKED_CAST")
     private fun getViewModel(): MainActivityViewModel {
 
         return ViewModelProvider(this, object : ViewModelProvider.Factory {
@@ -73,5 +80,5 @@ class MainActivity : AppCompatActivity() {
                 )as T
             }
         }).get(MainActivityViewModel::class.java)
-    }
+    }*/
 }

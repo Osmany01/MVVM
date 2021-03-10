@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainActivityViewModel(
+class MainActivityViewModel @Inject constructor(
     private val repositoryTopMovies: MoviesRepository
 ) : ViewModel() {
 
